@@ -58,20 +58,19 @@ end
 def show_call_graph(call_graph)
   class_blacklist = [Object, Class]
 
-  output = File.new '/tmp/graph.dot', 'w'
-  output.write 'digraph callgraph {'
+  IO.popen('dot -Tpng /tmp/graph.dot -o/tmp/graph.png', 'w') do |output|
+    output.write 'digraph callgraph {'
 
-  call_graph.each do |func, dependencies|
-    dependencies.each do |dependency|
-      next if (class_blacklist & [func, dependency]).any?
-      output.write "\"#{func}\" -> \"#{dependency}\";"
+    call_graph.each do |func, dependencies|
+      dependencies.each do |dependency|
+        next if (class_blacklist & [func, dependency]).any?
+        output.write "\"#{func}\" -> \"#{dependency}\";"
+      end
     end
+
+    output.write '}'
   end
 
-  output.write '}'
-  output.close
-
-  system 'dot -Tpng /tmp/graph.dot -o/tmp/graph.png'
   system 'eog /tmp/graph.png'
 end
 
