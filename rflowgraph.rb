@@ -35,28 +35,43 @@ class Class3
   end
 end
 
-callstack = []
-call_graph = Hash.new{ |hash, key| hash[key] = Set.new }
+CallGraphEntry = Struct.new :class, :method
 
-call_graph_tracer = proc do |event, file, line, id, binding, classname|
-  case event
-    when 'call','c-call'
-      caller = callstack[-1]
-      callee = "#{classname}##{id}"
-      call_graph[caller].add callee if caller
-      callstack.push callee
-    when 'return','c-return'
-      callstack.pop
-  end
+def start_trace
+  $callstack = []
+  $call_graph = Hash.new{ |hash, key| hash[key] = Set.new }
+
+  set_trace_func proc{ |event, file, line, id, binding, classname|
+    case event
+      when 'call','c-call'
+        caller = $callstack[-1]
+        callee = CallGraphEntry.new classname, id
+        $call_graph[caller].add callee if caller
+        $callstack.push callee
+      when 'return','c-return'
+        $callstack.pop
+    end
+  }
+end
+
+def add_call_graph_entry
+end
+
+def stop_trace
+  set_trace_func nil
 end
 
 def show_call_graph(call_graph)
+  class_blacklist = [Object, Class]
+
   output = File.new '/tmp/graph.dot', 'w'
   output.write 'digraph callgraph {'
 
   call_graph.each do |func, dependencies|
-    dependencies.each do |d|
-      output.write "\"#{func}\" -> \"#{d}\";"
+    dependencies.each do |dependency|
+      blacklisted_classes = (class_blacklist & [func.class, dependency.class])
+      next if blacklisted_classes.length > 0
+      output.write "\"#{func.class}\" -> \"#{dependency.class}\";"
     end
   end
 
@@ -67,7 +82,7 @@ def show_call_graph(call_graph)
   system 'eog /tmp/graph.png'
 end
 
-set_trace_func call_graph_tracer
+start_trace
 func1
-set_trace_func nil
-show_call_graph call_graph
+stop_trace
+show_call_graph $call_graph
