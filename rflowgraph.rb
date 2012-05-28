@@ -15,13 +15,21 @@ end
 
 class Class3
   def test
+    Class5.test
   end
 end
 
 class Class4
   def test
+    Class5.test
   end
 end
+
+class Class5
+  def self.test
+  end
+end
+
 
 def start_trace
   $callstack = []
