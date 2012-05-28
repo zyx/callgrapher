@@ -35,8 +35,6 @@ class Class3
   end
 end
 
-CallGraphEntry = Struct.new :class, :method
-
 def start_trace
   $callstack = []
   $call_graph = Hash.new{ |hash, key| hash[key] = Set.new }
@@ -45,9 +43,8 @@ def start_trace
     case event
       when 'call','c-call'
         caller = $callstack[-1]
-        callee = CallGraphEntry.new classname, id
-        $call_graph[caller].add callee if caller
-        $callstack.push callee
+        $call_graph[caller].add classname
+        $callstack.push classname
       when 'return','c-return'
         $callstack.pop
     end
@@ -69,9 +66,8 @@ def show_call_graph(call_graph)
 
   call_graph.each do |func, dependencies|
     dependencies.each do |dependency|
-      blacklisted_classes = (class_blacklist & [func.class, dependency.class])
-      next if blacklisted_classes.length > 0
-      output.write "\"#{func.class}\" -> \"#{dependency.class}\";"
+      next if (class_blacklist & [func, dependency]).any?
+      output.write "\"#{func}\" -> \"#{dependency}\";"
     end
   end
 
