@@ -51,9 +51,6 @@ def start_trace
   }
 end
 
-def add_call_graph_entry
-end
-
 def stop_trace
   set_trace_func nil
 end
