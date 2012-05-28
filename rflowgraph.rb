@@ -30,25 +30,25 @@ class Class5
   end
 end
 
-
-def start_trace
-  $callstack = []
-  $call_graph = Hash.new{ |hash, key| hash[key] = Set.new }
+def trace_class_dependencies
+  callstack = []
+  classgraph = Hash.new{ |hash, key| hash[key] = Set.new }
 
   set_trace_func proc{ |event, file, line, id, binding, classname|
     case event
       when 'call','c-call'
-        caller = $callstack[-1]
-        $call_graph[caller].add classname if caller
-        $callstack.push classname
+        caller = callstack[-1]
+        classgraph[caller].add classname if caller
+        callstack.push classname
       when 'return','c-return'
-        $callstack.pop
+        callstack.pop
     end
   }
-end
 
-def stop_trace
+  yield
+
   set_trace_func nil
+  classgraph
 end
 
 def show_call_graph(call_graph)
@@ -70,8 +70,4 @@ def show_call_graph(call_graph)
   system 'eog /tmp/graph.png'
 end
 
-start_trace
-Class1.new.test
-stop_trace
-
-show_call_graph $call_graph
+show_call_graph trace_class_dependencies{ Class1.new.test }
