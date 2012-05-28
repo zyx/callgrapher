@@ -1,22 +1,4 @@
-# TODO blacklist & just class mode
-
 require 'set'
-
-def func1
-  func2
-end
-
-def func2
-  func3a
-  func3b
-end
-
-def func3a
-end
-
-def func3b
-  Class1.new.test
-end
 
 class Class1
   def test
@@ -27,10 +9,16 @@ end
 class Class2
   def test
     Class3.new.test
+    Class4.new.test
   end
 end
 
 class Class3
+  def test
+  end
+end
+
+class Class4
   def test
   end
 end
@@ -43,7 +31,7 @@ def start_trace
     case event
       when 'call','c-call'
         caller = $callstack[-1]
-        $call_graph[caller].add classname
+        $call_graph[caller].add classname if caller
         $callstack.push classname
       when 'return','c-return'
         $callstack.pop
@@ -58,7 +46,7 @@ end
 def show_call_graph(call_graph)
   class_blacklist = [Object, Class]
 
-  IO.popen('dot -Tpng /tmp/graph.dot -o/tmp/graph.png', 'w') do |output|
+  IO.popen('dot -Tpng -o/tmp/graph.png', 'w') do |output|
     output.write 'digraph callgraph {'
 
     call_graph.each do |func, dependencies|
@@ -75,6 +63,7 @@ def show_call_graph(call_graph)
 end
 
 start_trace
-func1
+Class1.new.test
 stop_trace
+
 show_call_graph $call_graph
