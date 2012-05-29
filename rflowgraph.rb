@@ -63,7 +63,7 @@ def trace_class_dependencies
   classgraph
 end
 
-def show_call_graph(call_graph)
+def show_class_graph(call_graph)
 
   # Most ruby code ends up depending on these classes, so we keep the graph
   # cleaner by ignoring them.
@@ -86,4 +86,4 @@ def show_call_graph(call_graph)
   system 'eog /tmp/graph.png'
 end
 
-show_call_graph trace_class_dependencies{ Class1.new.test }
+show_class_graph trace_class_dependencies{ Class1.new.test }
