@@ -1,6 +1,10 @@
+# TODO check attributes defined with attr_XXX, think about other magic edge cases
+
 require 'set'
 
 class Class1
+  def initialize
+  end
   def test
     Class2.new.test
   end
@@ -27,6 +31,7 @@ end
 
 class Class5
   def self.test
+    Class1.new
   end
 end
 
@@ -38,6 +43,13 @@ def trace_class_dependencies
     case event
       when 'call','c-call'
         caller = callstack[-1]
+
+        # This line checks for the case where one class constructs another class
+        # via the new method. The method usually invoked is Class.new, so we
+        # check for that condition and create a direct dependency between the
+        # class calling new and the initialized class.
+        caller = callstack[-2] if caller == Class && id == :initialize
+
         classgraph[caller].add classname if caller
         callstack.push classname
       when 'return','c-return'
@@ -52,7 +64,10 @@ def trace_class_dependencies
 end
 
 def show_call_graph(call_graph)
-  class_blacklist = [Object, Class]
+
+  # Most ruby code ends up depending on these classes, so we keep the graph
+  # cleaner by ignoring them.
+  class_blacklist = [Object, Class, Kernel, IO, BasicObject]
 
   IO.popen('dot -Tpng -o/tmp/graph.png', 'w') do |output|
     output.write 'digraph callgraph {'
