@@ -72,10 +72,11 @@ def show_call_graph(call_graph)
   IO.popen('dot -Tpng -o/tmp/graph.png', 'w') do |output|
     output.write 'digraph callgraph {'
 
-    call_graph.each do |func, dependencies|
+    call_graph.each do |klass, dependencies|
+      next if class_blacklist.include? klass
       dependencies.each do |dependency|
-        next if (class_blacklist & [func, dependency]).any?
-        output.write "\"#{func}\" -> \"#{dependency}\";"
+        next if class_blacklist.include? dependency
+        output.write "\"#{klass}\" -> \"#{dependency}\";"
       end
     end
 
