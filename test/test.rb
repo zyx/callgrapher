@@ -43,6 +43,6 @@ class Test < MiniTest::Unit::TestCase
       Class5 => Set.new([Class, Class1])                      ,
       Class4 => Set.new([Class5])                             }
 
-    assert_equal trace_class_dependencies{ Class1.new.test }, desired_graph
+    assert_equal ClassGraphR.trace_class_dependencies{ Class1.new.test }, desired_graph
   end
 end
