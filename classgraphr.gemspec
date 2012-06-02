@@ -1,5 +1,5 @@
 Gem::Specification.new do |s|
-  s.name          = 'ClassGraphR'
+  s.name          = 'classgraphr'
   s.version       = '0.0.0'
   s.platform      = Gem::Platform::RUBY
   s.authors       = ['Luke Andrew']
