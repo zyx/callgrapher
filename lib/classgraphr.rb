@@ -30,25 +30,29 @@ module ClassGraphR
     classgraph
   end
 
-  def self.make_class_graph(call_graph)
+  def self.make_graphviz_graph(call_graph)
 
     # Most ruby code ends up depending on these classes, so we keep the graph
     # cleaner by ignoring them.
     class_blacklist = [Object, Class, Kernel, IO, BasicObject]
 
-    IO.popen('dot -Tpng -o/tmp/graph.png', 'w') do |output|
-      output.write 'digraph callgraph {'
+    graph = ''
+    graph << 'digraph callgraph {'
 
-      call_graph.each do |klass, dependencies|
-        next if class_blacklist.include? klass
-        dependencies.each do |dependency|
-          next if class_blacklist.include? dependency
-          output.write "\"#{klass}\" -> \"#{dependency}\";"
-        end
+    call_graph.each do |klass, dependencies|
+      next if class_blacklist.include? klass
+      dependencies.each do |dependency|
+        next if class_blacklist.include? dependency
+        graph << "\"#{klass}\" -> \"#{dependency}\";\n"
       end
-
-      output.write '}'
     end
+
+    graph << '}'
+  end
+
+  # @param graph a string containing a dot format digraph
+  def self.make_graph(graph)
+    IO.popen('dot -Tpng -o/tmp/graph.png', 'w') { |out| out.write graph }
   end
 
 end

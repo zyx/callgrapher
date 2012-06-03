@@ -35,14 +35,32 @@ class Class5
 end
 
 class Test < MiniTest::Unit::TestCase
-  def test_output_with_known_class_graph
-    desired_graph =                                           {
+  ExpectedTestGraph =                                         {
       Class1 => Set.new([Class, BasicObject, Class2])         ,
       Class2 => Set.new([Class, BasicObject, Class3, Class4]) ,
       Class3 => Set.new([Class5])                             ,
       Class5 => Set.new([Class, Class1])                      ,
       Class4 => Set.new([Class5])                             }
 
-    assert_equal ClassGraphR.trace_class_dependencies{ Class1.new.test }, desired_graph
+  ExpectedGraphvizGraph = 'digraph callgraph {"Class1" -> "Class2";
+"Class2" -> "Class3";
+"Class2" -> "Class4";
+"Class3" -> "Class5";
+"Class5" -> "Class1";
+"Class4" -> "Class5";
+}'
+
+  def test_class_dependency_tracing
+    assert_equal ClassGraphR.trace_class_dependencies{ Class1.new.test }, ExpectedTestGraph
+  end
+
+  def test_graphviz_output
+    assert_equal ClassGraphR.make_graphviz_graph(ExpectedTestGraph), ExpectedGraphvizGraph
+  end
+
+  # This test doesn't assert anything, it's just convenient to have the tests
+  # call Graphviz for you so you can manually inspect the output.
+  def test_make_graph
+    ClassGraphR.make_graph ExpectedGraphvizGraph
   end
 end
