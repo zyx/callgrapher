@@ -2,11 +2,13 @@ require 'set'
 
 module ClassGraphR
 
-  def self.trace_class_dependencies
+  # @param [Array<String>] file_whitelist only include classes defined in these files.
+  def self.trace_class_dependencies(file_whitelist = nil)
     callstack = []
     classgraph = Hash.new{ |hash, key| hash[key] = Set.new }
 
     set_trace_func proc{ |event, file, line, id, binding, classname|
+      next unless !file_whitelist || file_whitelist.include?(file)
       case event
         when 'call','c-call'
           caller = callstack[-1]
@@ -14,8 +16,12 @@ module ClassGraphR
           # This line checks for the case where one class constructs another class
           # via the new method. The method usually invoked is Class.new, so we
           # check for that condition and create a direct dependency between the
-          # class calling new and the initialized class.
-          caller = callstack[-2] if caller == Class && id == :initialize
+          # class calling new and the initialized class. The exception is when
+          # the object has no initialize method and BasicObject.initialize is
+          # called.
+          if caller == Class && id == :initialize && classname != BasicObject
+            caller = callstack[-2]
+          end
 
           classgraph[caller].add classname if caller
           callstack.push classname
@@ -30,19 +36,15 @@ module ClassGraphR
     classgraph
   end
 
+  # @param [Hash<Class, Set>] call_graph
+  #   the graph to transform into a Graphviz digraph
   def self.make_graphviz_graph(call_graph)
-
-    # Most ruby code ends up depending on these classes, so we keep the graph
-    # cleaner by ignoring them.
-    class_blacklist = [Object, Class, Kernel, IO, BasicObject]
 
     graph = ''
     graph << 'digraph callgraph {'
 
     call_graph.each do |klass, dependencies|
-      next if class_blacklist.include? klass
       dependencies.each do |dependency|
-        next if class_blacklist.include? dependency
         graph << "\"#{klass}\" -> \"#{dependency}\";\n"
       end
     end

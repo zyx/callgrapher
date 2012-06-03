@@ -35,17 +35,22 @@ class Class5
 end
 
 class Test < MiniTest::Unit::TestCase
-  ExpectedTestGraph =                                         {
-      Class1 => Set.new([Class, BasicObject, Class2])         ,
-      Class2 => Set.new([Class, BasicObject, Class3, Class4]) ,
-      Class3 => Set.new([Class5])                             ,
-      Class5 => Set.new([Class, Class1])                      ,
-      Class4 => Set.new([Class5])                             }
+  ExpectedTestGraph =                            {
+      Class1 => Set.new([Class, Class2])         ,
+      Class  => Set.new([BasicObject])           ,
+      Class2 => Set.new([Class, Class3, Class4]) ,
+      Class3 => Set.new([Class5])                ,
+      Class5 => Set.new([Class, Class1])         ,
+      Class4 => Set.new([Class5])                }
 
-  ExpectedGraphvizGraph = 'digraph callgraph {"Class1" -> "Class2";
+  ExpectedGraphvizGraph = 'digraph callgraph {"Class1" -> "Class";
+"Class1" -> "Class2";
+"Class" -> "BasicObject";
+"Class2" -> "Class";
 "Class2" -> "Class3";
 "Class2" -> "Class4";
 "Class3" -> "Class5";
+"Class5" -> "Class";
 "Class5" -> "Class1";
 "Class4" -> "Class5";
 }'
@@ -56,6 +61,11 @@ class Test < MiniTest::Unit::TestCase
 
   def test_graphviz_output
     assert_equal ClassGraphR.make_graphviz_graph(ExpectedTestGraph), ExpectedGraphvizGraph
+  end
+
+  def test_file_whitelist
+    assert_equal ClassGraphR.trace_class_dependencies([]) { Class1.new.test}, {}
+    assert_equal ClassGraphR.trace_class_dependencies([__FILE__]) { Class1.new.test}, ExpectedTestGraph
   end
 
   # This test doesn't assert anything, it's just convenient to have the tests
