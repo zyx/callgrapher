@@ -12,17 +12,6 @@ module ClassGraphR
       case event
         when 'call'
           caller = callstack[-1]
-
-          # This line checks for the case where one class constructs another class
-          # via the new method. The method usually invoked is Class.new, so we
-          # check for that condition and create a direct dependency between the
-          # class calling new and the initialized class. The exception is when
-          # the object has no initialize method and BasicObject.initialize is
-          # called.
-          if caller == Class && id == :initialize && classname != BasicObject
-            caller = callstack[-2]
-          end
-
           classgraph[caller].add classname if caller && caller != classname
           callstack.push classname
         when 'return'

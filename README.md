@@ -17,6 +17,9 @@ command to generate a graph & save it to /tmp/graph.png.
 
 Known Limitations
 -----------------
+It ignores dependencies created by C function calls as the filename doesn't seem
+to reported correctly in these cases.
+
 It does not pick up dependencies created by calling methods defined by the
 attr_reader, attr_writer and attr_accessor methods. (see [this][bug] bug report)
 ). There's probably various other meta-programming techniques that will interact
