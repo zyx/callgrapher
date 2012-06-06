@@ -2,8 +2,15 @@ require 'set'
 
 module ClassGraphR
 
-  # @param [Array<String>] file_whitelist only include classes defined in these files.
-  def self.trace_class_dependencies(file_whitelist = nil)
+  # @param [Array<String>] file_whitelist
+  #   Only include classes defined in these files.
+  # @param [Integer] namespace_depth 
+  #   The number of namespaces to report. For example, a class name of
+  #   Foo::Bar::Baz, when processed with namespace_depth == 1, would be reported
+  #   as just Foo.  With namespace_depth == 2, as Foo::Bar, and so on. A
+  #   namespace_depth of 0 indicates that the entire class name should be
+  #   reported.
+  def self.trace_class_dependencies(namespace_depth = 0, file_whitelist = nil)
     callstack = []
     classgraph = Hash.new{ |hash, key| hash[key] = Set.new }
 
@@ -12,6 +19,14 @@ module ClassGraphR
       case event
         when 'call'
           caller = callstack[-1]
+
+          classname =
+            if namespace_depth > 0
+              classname.name.split('::').first(namespace_depth).join('::')
+            else
+              classname.name
+            end
+
           classgraph[caller].add classname if caller && caller != classname
           callstack.push classname
         when 'return'

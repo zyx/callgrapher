@@ -11,47 +11,73 @@ end
 
 class Class2
   def test
-    Class3.new.test
+    M1::M2::Class3.new.test
     Class4.new.test
   end
 end
 
-class Class3
-  def test
-    Class5.test
+module M1
+  module M2
+    class Class3
+      def test
+        M3::Class5.test
+      end
+    end
   end
 end
 
 class Class4
   def test
-    Class5.test
+    M3::Class5.test
   end
 end
 
-class Class5
-  def self.test
-    self.self_call
-    Class1.new
-  end
-  def self.self_call
+module M3
+  class Class5
+
+    def self.test
+      self.self_call
+      Class1.new
+    end
+
+    def self.self_call
+    end
+
   end
 end
 
 class Test < MiniTest::Unit::TestCase
-  ExpectedTestGraph =                     {
-      Class1 => Set.new([Class2])         ,
-      Class2 => Set.new([Class3, Class4]) ,
-      Class3 => Set.new([Class5])         ,
-      Class5 => Set.new([Class1])         ,
-      Class4 => Set.new([Class5])         }
+
+  ExpectedTestGraph =                                           {
+      'Class1'         => Set.new(['Class2'])                   ,
+      'Class2'         => Set.new(['M1::M2::Class3', 'Class4']) ,
+      'M1::M2::Class3' => Set.new(['M3::Class5'])               ,
+      'Class4'         => Set.new(['M3::Class5'])               ,
+      'M3::Class5'     => Set.new(['Class1'])                   }
+
+  ExpectedTestGraph_NamespaceDepth1 =       {
+      'Class1' => Set.new(['Class2'])       ,
+      'Class2' => Set.new(['M1', 'Class4']) ,
+      'M1'     => Set.new(['M3'])           ,
+      'Class4' => Set.new(['M3'])           ,
+      'M3'     => Set.new(['Class1'])       }
+
+  ExpectedTestGraph_NamespaceDepth2 =               {
+      'Class1'     => Set.new(['Class2'])           ,
+      'Class2'     => Set.new(['M1::M2', 'Class4']) ,
+      'M1::M2'     => Set.new(['M3::Class5'])       ,
+      'Class4'     => Set.new(['M3::Class5'])       ,
+      'M3::Class5' => Set.new(['Class1'])           }
 
   ExpectedGraphvizGraph = 'digraph callgraph {"Class1" -> "Class2";
-"Class2" -> "Class3";
+"Class2" -> "M1::M2::Class3";
 "Class2" -> "Class4";
-"Class3" -> "Class5";
-"Class5" -> "Class1";
-"Class4" -> "Class5";
+"M1::M2::Class3" -> "M3::Class5";
+"Class4" -> "M3::Class5";
+"M3::Class5" -> "Class1";
 }'
+
+  EmptyHash = {}
 
   def test_class_dependency_tracing
     assert_equal ExpectedTestGraph, ClassGraphR.trace_class_dependencies{ Class1.new.test }
@@ -62,9 +88,19 @@ class Test < MiniTest::Unit::TestCase
   end
 
   def test_file_whitelist
-    empty_dict = {}
-    assert_equal empty_dict, ClassGraphR.trace_class_dependencies([]){ Class1.new.test }
-    assert_equal ExpectedTestGraph, ClassGraphR.trace_class_dependencies([__FILE__]) { Class1.new.test}
+    assert_equal EmptyHash,
+                 ClassGraphR.trace_class_dependencies(0, []){ Class1.new.test }
+
+    assert_equal ExpectedTestGraph,
+                 ClassGraphR.trace_class_dependencies(0, [__FILE__]) { Class1.new.test}
+  end
+
+  def test_namespace_depth
+    assert_equal ExpectedTestGraph_NamespaceDepth1,
+                 ClassGraphR.trace_class_dependencies(1) { Class1.new.test }
+
+    assert_equal ExpectedTestGraph_NamespaceDepth2,
+                 ClassGraphR.trace_class_dependencies(2) { Class1.new.test }
   end
 
   # This test doesn't assert anything, it's just convenient to have the tests
