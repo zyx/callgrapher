@@ -10,7 +10,7 @@ module ClassGraphR
     set_trace_func proc{ |event, file, line, id, binding, classname|
       next unless !file_whitelist || file_whitelist.include?(file)
       case event
-        when 'call','c-call'
+        when 'call'
           caller = callstack[-1]
 
           # This line checks for the case where one class constructs another class
@@ -25,7 +25,7 @@ module ClassGraphR
 
           classgraph[caller].add classname if caller
           callstack.push classname
-        when 'return','c-return'
+        when 'return'
           callstack.pop
       end
     }

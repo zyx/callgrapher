@@ -35,22 +35,17 @@ class Class5
 end
 
 class Test < MiniTest::Unit::TestCase
-  ExpectedTestGraph =                            {
-      Class1 => Set.new([Class, Class2])         ,
-      Class  => Set.new([BasicObject])           ,
-      Class2 => Set.new([Class, Class3, Class4]) ,
-      Class3 => Set.new([Class5])                ,
-      Class5 => Set.new([Class, Class1])         ,
-      Class4 => Set.new([Class5])                }
+  ExpectedTestGraph =                     {
+      Class1 => Set.new([Class2])         ,
+      Class2 => Set.new([Class3, Class4]) ,
+      Class3 => Set.new([Class5])         ,
+      Class5 => Set.new([Class1])         ,
+      Class4 => Set.new([Class5])         }
 
-  ExpectedGraphvizGraph = 'digraph callgraph {"Class1" -> "Class";
-"Class1" -> "Class2";
-"Class" -> "BasicObject";
-"Class2" -> "Class";
+  ExpectedGraphvizGraph = 'digraph callgraph {"Class1" -> "Class2";
 "Class2" -> "Class3";
 "Class2" -> "Class4";
 "Class3" -> "Class5";
-"Class5" -> "Class";
 "Class5" -> "Class1";
 "Class4" -> "Class5";
 }'
