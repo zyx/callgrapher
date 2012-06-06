@@ -54,16 +54,17 @@ class Test < MiniTest::Unit::TestCase
 }'
 
   def test_class_dependency_tracing
-    assert_equal ClassGraphR.trace_class_dependencies{ Class1.new.test }, ExpectedTestGraph
+    assert_equal ExpectedTestGraph, ClassGraphR.trace_class_dependencies{ Class1.new.test }
   end
 
   def test_graphviz_output
-    assert_equal ClassGraphR.make_graphviz_graph(ExpectedTestGraph), ExpectedGraphvizGraph
+    assert_equal ExpectedGraphvizGraph, ClassGraphR.make_graphviz_graph(ExpectedTestGraph)
   end
 
   def test_file_whitelist
-    assert_equal ClassGraphR.trace_class_dependencies([]) { Class1.new.test}, {}
-    assert_equal ClassGraphR.trace_class_dependencies([__FILE__]) { Class1.new.test}, ExpectedTestGraph
+    empty_dict = {}
+    assert_equal empty_dict, ClassGraphR.trace_class_dependencies([]){ Class1.new.test }
+    assert_equal ExpectedTestGraph, ClassGraphR.trace_class_dependencies([__FILE__]) { Class1.new.test}
   end
 
   # This test doesn't assert anything, it's just convenient to have the tests
