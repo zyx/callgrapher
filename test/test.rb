@@ -30,7 +30,10 @@ end
 
 class Class5
   def self.test
+    self.self_call
     Class1.new
+  end
+  def self.self_call
   end
 end
 

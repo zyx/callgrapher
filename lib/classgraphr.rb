@@ -23,7 +23,7 @@ module ClassGraphR
             caller = callstack[-2]
           end
 
-          classgraph[caller].add classname if caller
+          classgraph[caller].add classname if caller && caller != classname
           callstack.push classname
         when 'return'
           callstack.pop
