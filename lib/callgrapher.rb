@@ -18,7 +18,7 @@
 
 require 'set'
 
-module ClassGraphR
+module CallGrapher
 
   # @param [Array<String>] file_whitelist
   #   Only include classes defined in these files.

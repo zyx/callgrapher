@@ -16,7 +16,7 @@
 # This is the main executable for the whysynth-controller project. It also
 # contains most of the code that relies on external libraries. 
 
-require 'classgraphr'
+require 'callgrapher'
 require 'minitest/autorun'
 
 class Class1
@@ -98,32 +98,32 @@ class Test < MiniTest::Unit::TestCase
   EmptyHash = {}
 
   def test_class_dependency_tracing
-    assert_equal ExpectedTestGraph, ClassGraphR.trace_class_dependencies{ Class1.new.test }
+    assert_equal ExpectedTestGraph, CallGrapher.trace_class_dependencies{ Class1.new.test }
   end
 
   def test_graphviz_output
-    assert_equal ExpectedGraphvizGraph, ClassGraphR.make_graphviz_graph(ExpectedTestGraph)
+    assert_equal ExpectedGraphvizGraph, CallGrapher.make_graphviz_graph(ExpectedTestGraph)
   end
 
   def test_file_whitelist
     assert_equal EmptyHash,
-                 ClassGraphR.trace_class_dependencies(0, []){ Class1.new.test }
+                 CallGrapher.trace_class_dependencies(0, []){ Class1.new.test }
 
     assert_equal ExpectedTestGraph,
-                 ClassGraphR.trace_class_dependencies(0, [__FILE__]) { Class1.new.test}
+                 CallGrapher.trace_class_dependencies(0, [__FILE__]) { Class1.new.test}
   end
 
   def test_namespace_depth
     assert_equal ExpectedTestGraph_NamespaceDepth1,
-                 ClassGraphR.trace_class_dependencies(1) { Class1.new.test }
+                 CallGrapher.trace_class_dependencies(1) { Class1.new.test }
 
     assert_equal ExpectedTestGraph_NamespaceDepth2,
-                 ClassGraphR.trace_class_dependencies(2) { Class1.new.test }
+                 CallGrapher.trace_class_dependencies(2) { Class1.new.test }
   end
 
   # This test doesn't assert anything, it's just convenient to have the tests
   # call Graphviz for you so you can manually inspect the output.
   def test_make_graph
-    ClassGraphR.make_graph ExpectedGraphvizGraph
+    CallGrapher.make_graph ExpectedGraphvizGraph
   end
 end
