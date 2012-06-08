@@ -87,6 +87,12 @@ class Test < MiniTest::Unit::TestCase
       'Class4'     => Set.new(['M3::Class5'])       ,
       'M3::Class5' => Set.new(['Class1'])           }
 
+  ExpectedTestGraph_WithoutClass4 =                                 {
+      'Class1'         => Set.new(['Class2'])                       ,
+      'Class2'         => Set.new(['M1::M2::Class3', 'M3::Class5']) ,
+      'M1::M2::Class3' => Set.new(['M3::Class5'])                   ,
+      'M3::Class5'     => Set.new(['Class1'])                       }
+
   ExpectedGraphvizGraph = 'digraph callgraph {"Class1" -> "Class2";
 "Class2" -> "M1::M2::Class3";
 "Class2" -> "Class4";
@@ -119,6 +125,10 @@ class Test < MiniTest::Unit::TestCase
 
     assert_equal ExpectedTestGraph_NamespaceDepth2,
                  CallGrapher.trace_class_dependencies(2) { Class1.new.test }
+  end
+
+  def test_class_blacklist
+    assert_equal ExpectedTestGraph_WithoutClass4, CallGrapher.trace_class_dependencies(0, [__FILE__], [Class4]) { Class1.new.test }
   end
 
   # This test doesn't assert anything, it's just convenient to have the tests

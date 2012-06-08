@@ -28,12 +28,15 @@ module CallGrapher
   #   as just Foo.  With namespace_depth == 2, as Foo::Bar, and so on. A
   #   namespace_depth of 0 indicates that the entire class name should be
   #   reported.
-  def self.trace_class_dependencies(namespace_depth = 0, file_whitelist = nil)
+  def self.trace_class_dependencies(namespace_depth = 0,
+                                    file_whitelist = nil,
+                                    class_blacklist = nil)
     callstack = []
     classgraph = Hash.new{ |hash, key| hash[key] = Set.new }
 
     set_trace_func proc{ |event, file, line, id, binding, classname|
-      next unless !file_whitelist || file_whitelist.include?(file)
+      next if file_whitelist && !file_whitelist.include?(file)
+      next if class_blacklist && class_blacklist.include?(classname)
       case event
         when 'call'
           caller = callstack[-1]
