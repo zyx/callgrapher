@@ -124,6 +124,6 @@ class Test < MiniTest::Unit::TestCase
   # This test doesn't assert anything, it's just convenient to have the tests
   # call Graphviz for you so you can manually inspect the output.
   def test_make_graph
-    CallGrapher.make_graph ExpectedGraphvizGraph
+    CallGrapher.make_graph ExpectedGraphvizGraph, './graph.png'
   end
 end

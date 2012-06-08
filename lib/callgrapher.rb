@@ -75,8 +75,8 @@ module CallGrapher
   end
 
   # @param graph a string containing a dot format digraph
-  def self.make_graph(graph)
-    IO.popen('dot -Tpng -o/tmp/graph.png', 'w') { |out| out.write graph }
+  def self.make_graph(graph, path)
+    IO.popen("dot -Tpng -o#{path}", 'w') { |out| out.write graph }
   end
 
 end
