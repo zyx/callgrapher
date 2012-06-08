@@ -69,7 +69,9 @@ module CallGrapher
     graph << 'digraph callgraph {'
 
     call_graph.each do |klass, dependencies|
+      graph << "\"#{klass}\" [shape=box];\n"
       dependencies.each do |dependency|
+        graph << "\"#{dependency}\" [shape=box];\n"
         graph << "\"#{klass}\" -> \"#{dependency}\";\n"
       end
     end

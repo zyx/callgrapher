@@ -93,11 +93,22 @@ class Test < MiniTest::Unit::TestCase
       'M1::M2::Class3' => Set.new(['M3::Class5'])                   ,
       'M3::Class5'     => Set.new(['Class1'])                       }
 
-  ExpectedGraphvizGraph = 'digraph callgraph {"Class1" -> "Class2";
+  ExpectedGraphvizGraph = 'digraph callgraph {"Class1" [shape=box];
+"Class2" [shape=box];
+"Class1" -> "Class2";
+"Class2" [shape=box];
+"M1::M2::Class3" [shape=box];
 "Class2" -> "M1::M2::Class3";
+"Class4" [shape=box];
 "Class2" -> "Class4";
+"M1::M2::Class3" [shape=box];
+"M3::Class5" [shape=box];
 "M1::M2::Class3" -> "M3::Class5";
+"Class4" [shape=box];
+"M3::Class5" [shape=box];
 "Class4" -> "M3::Class5";
+"M3::Class5" [shape=box];
+"Class1" [shape=box];
 "M3::Class5" -> "Class1";
 }'
 
