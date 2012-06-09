@@ -139,7 +139,7 @@ class Test < MiniTest::Unit::TestCase
   end
 
   def test_class_blacklist
-    assert_equal ExpectedTestGraph_WithoutClass4, CallGrapher.trace_class_dependencies(0, [__FILE__], [Class4]) { Class1.new.test }
+    assert_equal ExpectedTestGraph_WithoutClass4, CallGrapher.trace_class_dependencies(0, [__FILE__], ['Class4']) { Class1.new.test }
   end
 
   # This test doesn't assert anything, it's just convenient to have the tests

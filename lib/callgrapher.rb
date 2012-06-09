@@ -34,22 +34,22 @@ module CallGrapher
     callstack = []
     classgraph = Hash.new{ |hash, key| hash[key] = Set.new }
 
-    set_trace_func proc{ |event, file, line, id, binding, classname|
+    set_trace_func proc{ |event, file, line, id, binding, klass|
       next if file_whitelist && !file_whitelist.include?(file)
-      next if class_blacklist && class_blacklist.include?(classname)
+      next if class_blacklist && class_blacklist.include?(klass.to_s)
       case event
         when 'call'
           caller = callstack[-1]
 
-          classname =
+          klass =
             if namespace_depth > 0
-              classname.name.split('::').first(namespace_depth).join('::')
+              klass.name.split('::').first(namespace_depth).join('::')
             else
-              classname.name
+              klass.name
             end
 
-          classgraph[caller].add classname if caller && caller != classname
-          callstack.push classname
+          classgraph[caller].add klass if caller && caller != klass
+          callstack.push klass
         when 'return'
           callstack.pop
       end
