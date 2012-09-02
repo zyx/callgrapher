@@ -10,9 +10,9 @@ Ruby 1.9 or later & Graphviz on your $PATH
 
 Usage
 -----
-Require 'callgrapher' and call trace_class_dependencies, passing in a block
+Require `callgrapher` and call `trace_class_dependencies`, passing in a block
 containing the code you want to graph. A Hash of sets will be returned, ready
-for proccesing with make_class_graph. Calling make_class_graph uses the `dot`
+for procesing with make_class_graph. Calling `make_class_graph` uses the `dot`
 command to generate a graph & save it to /tmp/graph.png.
 
 Known Limitations
